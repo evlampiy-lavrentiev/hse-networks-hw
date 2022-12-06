@@ -1,15 +1,21 @@
 #!/usr/bin/env python3
 
-import glog as log # pip install glog
+import glog as log
 import argparse
 import subprocess
+import platform
 
 
-def check(host, MTU):
-    # ping with don't fragment flag, -c count -W timeout
-    cmd = f'ping -M do -s {MTU} {host} -c 1 -W 3'
+# @TODO if os == 'linux':
+def check(host, MTU, os):
+    """ping with don't fragment flag, -c count -W timeout
+    """
+    if os == 'darwin': # mac-os
+        cmd = f'ping -D -s {MTU} {host} -c 1 -W 3000'
+    else:
+        cmd = f'ping -M do -s {MTU} {host} -c 1 -W 3'
     cmd = cmd.split(' ')
-    res = subprocess.run(cmd, stderr=subprocess.PIPE, stdout=subprocess.PIPE, universal_newlines=True)
+    res = subprocess.run(cmd, stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL, universal_newlines=True)
     return res.returncode == 0
 
 
@@ -33,10 +39,12 @@ loglevel = args.loglevel
 
 log.setLevel(loglevel)
 
+current_os = platform.system().lower()
+
 left, right = 0, 1502 - 28
 while left + 1 < right:
     mid = (left + right) // 2
-    if check(host, MTU=mid):
+    if check(host, MTU=mid, os=current_os):
         log.info(f'MTU {mid} is ok')
         left = mid
     else:

@@ -7,7 +7,7 @@ import subprocess
 
 def check(host, MTU):
     # ping with don't fragment flag, -c count -W timeout
-    cmd = f'ping -D -s {MTU} {host} -c 1 -W 3000'
+    cmd = f'ping -M do -s {MTU} {host} -c 1 -W 3'
     cmd = cmd.split(' ')
     res = subprocess.run(cmd, stderr=subprocess.PIPE, stdout=subprocess.PIPE, universal_newlines=True)
     return res.returncode == 0
@@ -17,6 +17,7 @@ def check(host, MTU):
 parser = argparse.ArgumentParser()
 parser.add_argument(
     '--host',
+    required=True,
     help='host for which the minimal MTU is searched for'
 )
 parser.add_argument(
@@ -32,7 +33,7 @@ loglevel = args.loglevel
 
 log.setLevel(loglevel)
 
-left, right = 0, 1500
+left, right = 0, 1502 - 28
 while left + 1 < right:
     mid = (left + right) // 2
     if check(host, MTU=mid):

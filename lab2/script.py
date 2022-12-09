@@ -41,6 +41,10 @@ log.setLevel(loglevel)
 
 current_os = platform.system().lower()
 
+if not check(host, MTU=0, os=current_os):
+    print(f'host {host} is unavailable')
+    exit(0)
+
 left, right = 0, 1502 - 28
 while left + 1 < right:
     mid = (left + right) // 2
